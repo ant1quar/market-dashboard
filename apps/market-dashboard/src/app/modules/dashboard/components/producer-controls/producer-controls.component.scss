@@ -1,0 +1,11 @@
+.controls {
+  @apply flex flex-col gap-3;
+}
+
+.controls__actions {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+.controls__rates {
+  @apply text-sm text-slate-600;
+}

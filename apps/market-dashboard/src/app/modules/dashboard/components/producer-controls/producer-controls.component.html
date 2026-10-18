@@ -1,0 +1,16 @@
+<div class="controls">
+  <div class="controls__actions">
+    @if (producer.status() === ProducerStatus.Running) {
+      <p-button label="Pause" severity="secondary" (onClick)="pauseHandler()" />
+    }
+    @if (producer.status() === ProducerStatus.Paused) {
+      <p-button label="Resume" (onClick)="resumeHandler()" />
+    }
+    <p-tag [value]="producer.status()" [severity]="statusSeverity()" />
+  </div>
+  <p class="controls__rates">
+    Nominal
+    {{ nominalRatePerSecond() | number: '1.0-1' }}/s · Actual
+    {{ producer.actualRate() | number: '1.0-1' }}/s
+  </p>
+</div>

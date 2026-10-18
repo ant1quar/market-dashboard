@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { ProducerService } from '../../../producer/services/producer.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
 })
-export class DashboardPageComponent {}
+export class DashboardPageComponent {
+  protected readonly producer = inject(ProducerService);
+}
