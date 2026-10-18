@@ -1,0 +1,28 @@
+<div class="layout">
+  <header class="layout__header">
+    <div class="layout__brand">
+      <span class="layout__title">Market Dashboard</span>
+    </div>
+    <nav class="layout__nav" aria-label="Main">
+      <a
+        class="layout__link"
+        routerLink="/dashboard"
+        routerLinkActive="layout__link_active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Dashboard
+      </a>
+      <a
+        class="layout__link"
+        routerLink="/settings"
+        routerLinkActive="layout__link_active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Settings
+      </a>
+    </nav>
+  </header>
+  <main class="layout__main">
+    <router-outlet />
+  </main>
+</div>

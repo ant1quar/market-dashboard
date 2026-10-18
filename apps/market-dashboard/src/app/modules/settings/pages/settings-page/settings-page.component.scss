@@ -1,0 +1,11 @@
+.page {
+  @apply flex flex-col gap-2;
+}
+
+.page__heading {
+  @apply text-2xl font-semibold text-slate-900;
+}
+
+.page__lead {
+  @apply text-sm text-slate-600;
+}
