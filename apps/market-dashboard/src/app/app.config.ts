@@ -9,6 +9,7 @@ import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import { LayoutModule } from './layout/layout.module';
+import { producerProviders } from './modules/producer/producer.providers';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(appRoutes),
     importProvidersFrom(LayoutModule),
+    ...producerProviders,
     providePrimeNG({
       theme: {
         preset: Aura,
