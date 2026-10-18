@@ -197,8 +197,6 @@ impl MarketProducer {
     pub fn symbol(&self, i: u32) -> String {
         self.inner.symbol(i)
     }
-
-    pub fn free(self) {}
 }
 
 pub fn check_batch_invariants(batch: &[i32], instrument_count: u32) -> bool {
