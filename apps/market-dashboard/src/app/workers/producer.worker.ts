@@ -6,10 +6,7 @@ import {
 } from '@test/market-engine';
 import init, { MarketProducer } from '../../../public/wasm/market_producer.js';
 
-const wasmModuleUrl = new URL(
-  '../../../public/wasm/market_producer_bg.wasm',
-  import.meta.url
-);
+const wasmModuleUrl = new URL('wasm/market_producer_bg.wasm', import.meta.url);
 
 class WasmMarketGenerator implements MarketGenerator {
   private producer: MarketProducer | null = null;

@@ -26,7 +26,7 @@ export const producerProviders: Array<Provider | EnvironmentProviders> = [
   },
   {
     provide: PRODUCER_WORKER_FACTORY,
-    useFactory: createDefaultProducerWorker,
+    useValue: createDefaultProducerWorker,
   },
   provideAppInitializer(() => {
     inject(ProducerWorkerService);
