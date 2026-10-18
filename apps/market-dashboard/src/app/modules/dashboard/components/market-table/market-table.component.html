@@ -1,4 +1,4 @@
-<p-table styleClass="market-table">
+<p-table [value]="producer.rows()" styleClass="market-table">
   <ng-template pTemplate="header">
     <tr>
       <th>Symbol</th>
@@ -9,40 +9,38 @@
       <th>Imbalance</th>
     </tr>
   </ng-template>
-  <ng-template pTemplate="body">
-    @for (row of producer.rows(); track row.symbol) {
-      <tr>
-        <td>{{ row.symbol }}</td>
-        <td>
-          @if (row.lastPriceCents | priceCents; as lastPrice) {
-            {{ lastPrice }}
-          } @else {
-            —
-          }
-        </td>
-        <td>
-          @if (row.spreadCents | priceCents; as spread) {
-            {{ spread }}
-          } @else {
-            —
-          }
-        </td>
-        <td>{{ row.volume }}</td>
-        <td>
-          @if (row.vwapCents | priceCents; as vwap) {
-            {{ vwap }}
-          } @else {
-            —
-          }
-        </td>
-        <td>
-          @if (row.imbalance | imbalance; as imbalance) {
-            {{ imbalance }}
-          } @else {
-            —
-          }
-        </td>
-      </tr>
-    }
+  <ng-template pTemplate="body" let-row>
+    <tr>
+      <td>{{ row.symbol }}</td>
+      <td>
+        @if (row.lastPriceCents | priceCents; as lastPrice) {
+          {{ lastPrice }}
+        } @else {
+          —
+        }
+      </td>
+      <td>
+        @if (row.spreadCents | priceCents; as spread) {
+          {{ spread }}
+        } @else {
+          —
+        }
+      </td>
+      <td>{{ row.volume }}</td>
+      <td>
+        @if (row.vwapCents | priceCents; as vwap) {
+          {{ vwap }}
+        } @else {
+          —
+        }
+      </td>
+      <td>
+        @if (row.imbalance | imbalance; as imbalance) {
+          {{ imbalance }}
+        } @else {
+          —
+        }
+      </td>
+    </tr>
   </ng-template>
 </p-table>

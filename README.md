@@ -2,10 +2,10 @@
 
 Test-task implementation: a zoneless **Angular 21** dashboard that simulates high-frequency market data, aggregates trading metrics off the main thread, and renders a live instrument table with configurable producer settings.
 
-|                |                                                                                                        |
-| -------------- | ------------------------------------------------------------------------------------------------------ |
-| **Live demo**  | `https://<github-user>.github.io/realtime-fintech-dashboard/` — [one-time setup](docs/GITHUB_PAGES.md) |
-| **Repository** | `https://github.com/<github-user>/realtime-fintech-dashboard` — [one-time setup](docs/GITHUB_PAGES.md) |
+|                |                                                |
+| -------------- | ---------------------------------------------- |
+| **Live demo**  | `https://<github-user>.github.io/<repo-name>/` |
+| **Repository** | `https://github.com/<github-user>/<repo-name>` |
 
 ## Overview
 
@@ -108,11 +108,9 @@ On every push to **`main`**:
 4. Copy `index.html` → `404.html` for client-side routing on Pages
 5. Upload artifact and **deploy-pages**
 
-**One-time repo setup:** see **[docs/GITHUB_PAGES.md](docs/GITHUB_PAGES.md)** (`./scripts/publish-github.sh`, then Settings → Pages → **GitHub Actions**). After the first successful deploy, replace `<github-user>` in the links at the top of this README.
+**One-time repo setup:** `./scripts/publish-github.sh` (if needed), then Settings → Pages → **GitHub Actions**. After the first successful deploy, set the live demo and repository URLs in the table above.
 
 ## Architecture
-
-Подробное описание слоёв, протокола worker и жизненного цикла: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** (RU).
 
 ```mermaid
 flowchart LR
