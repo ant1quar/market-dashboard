@@ -4,7 +4,10 @@
   "license": "MIT",
   "scripts": {
     "prepare": "husky",
-    "lint": "nx run-many -t lint --all --max-warnings=0"
+    "lint": "nx run-many -t lint --all --max-warnings=0",
+    "test": "nx run-many -t test --all",
+    "build": "nx run-many -t build --all",
+    "ci": "nx run-many -t lint test build --all"
   },
   "private": true,
   "dependencies": {

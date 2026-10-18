@@ -31,6 +31,11 @@ Under `apps/market-dashboard/src/app/`:
 - Local author: personal GitHub identity (not Medsi `includeIf` gitconfig).
 - Commits: no Cursor co-author trailers.
 
+## CI / GitHub Pages
+
+- Push to `main` runs `.github/workflows/deploy.yml` (`npm run ci`, then production build with `baseHref=/<repo>/`, `404.html` for SPA routing, deploy via GitHub Actions).
+- Repo settings: Pages → Build and deployment → Source: **GitHub Actions**.
+
 ## Reference
 
 Full Medsi orchestrator rules and FE monorepo map: `ws/knowledge/frontend.md` and `ws/AGENTS.md` in the parent workspace (not vendored here).
