@@ -1,102 +1,178 @@
-# Test
+# Realtime Fintech Market Dashboard
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Test-task implementation: a zoneless **Angular 21** dashboard that simulates high-frequency market data, aggregates trading metrics off the main thread, and renders a live instrument table with configurable producer settings.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+|                |                                                        |
+| -------------- | ------------------------------------------------------ |
+| **Live demo**  | _TODO: `https://<github-user>.github.io/<repo-name>/`_ |
+| **Repository** | _TODO: `https://github.com/<github-user>/<repo-name>`_ |
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## Overview
 
-## Run tasks
+The app exposes two routes:
 
-To run the dev server for your app, use:
+- **Dashboard** — PrimeNG table with last price, bid/ask, spread, volume, notional, and order-book imbalance; pause/resume and nominal vs actual update rate.
+- **Settings** — reactive form (instrument count, batch size, interval) validated against limits; **Apply** starts or restarts generation with a new seed.
 
-```sh
+Market ticks are produced in **Rust/WebAssembly** inside a dedicated **Web Worker**. Rolling metrics are computed in the pure TypeScript **`@test/market-engine`** library (`MetricsAccumulator`, `ProducerEngine`). The main thread only receives throttled snapshots via **`ProducerService`** (Angular signals).
+
+Stack: **Nx 22**, **Angular 21**, **PrimeNG 21**, **Tailwind 3**, **Jest**, **Rust + wasm-pack**.
+
+## Prerequisites
+
+| Tool              | Version / notes                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| **Node.js**       | **24.x** (matches [CI](.github/workflows/deploy.yml))                                      |
+| **npm**           | Comes with Node; lockfile is `package-lock.json`                                           |
+| **rustup**        | Recommended over Homebrew-only `cargo` (needs `wasm32` target)                             |
+| **wasm32 target** | `rustup target add wasm32-unknown-unknown`                                                 |
+| **wasm-pack**     | [Install](https://rustwasm.github.io/wasm-pack/installer/) (e.g. `brew install wasm-pack`) |
+
+### PATH notes
+
+After `rustup-init`, ensure **`~/.cargo/bin`** is on your `PATH` so `cargo`, `rustc`, and `rustup` resolve to the toolchain that has `wasm32-unknown-unknown`. If `cargo test` in `libs/market-producer-wasm` fails with a missing target, run `rustup target add wasm32-unknown-unknown` for the active toolchain (`rustup show active-toolchain`).
+
+`wasm-pack` must be available when building the app: `market-dashboard` depends on `market-producer-wasm:build`, which runs `wasm-pack build`.
+
+## Install
+
+```bash
+git clone <your-repo-url>
+cd <repo-name>
+npm ci
+```
+
+Building or serving the app triggers a Wasm release build on first run (via Nx `dependsOn`).
+
+## Development
+
+```bash
+# Dev server (builds wasm + Angular, hot reload)
 npx nx serve market-dashboard
+
+# Same, explicit development configuration
+npx nx serve market-dashboard --configuration=development
 ```
 
-To create a production bundle:
+Open the URL printed by the dev server (typically `http://localhost:4200`). Use **Settings → Apply** to start the producer.
 
-```sh
-npx nx build market-dashboard
+Serve the production bundle locally:
+
+```bash
+npx nx run market-dashboard:build:production
+npx nx run market-dashboard:serve-static
 ```
 
-To see all available targets to run for a project, run:
+## Test
 
-```sh
-npx nx show project market-dashboard
+```bash
+# All lint + unit tests + builds (what CI runs before Pages-specific build)
+npm run ci
+
+# Shorthand scripts from package.json
+npm run lint    # nx run-many -t lint --all
+npm run test    # nx run-many -t test --all
+npm run build   # nx run-many -t build --all
+
+# Individual projects
+npx nx test market-engine
+npx nx test market-dashboard
+npx nx run market-producer-wasm:test   # cargo test in libs/market-producer-wasm
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+Rust tests cover batch shape, invariants, determinism by seed, and price continuity. Jest covers metrics accumulation, engine scheduling/snapshot throttle, `ProducerService` + fake worker, and settings validators.
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Production build
 
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/angular:app demo
+```bash
+npx nx run market-dashboard:build:production
 ```
 
-To generate a new library, use:
+Output: `dist/apps/market-dashboard/browser/` (includes hashed assets and copied `public/wasm/`).
 
-```sh
-npx nx g @nx/angular:lib mylib
+For **GitHub Pages** project sites, the base href must include the repository name:
+
+```bash
+npx nx run market-dashboard:build:production --baseHref=/<repo-name>/
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## CI and GitHub Pages
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Deployment is defined in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
 
-## Set up CI!
+On every push to **`main`**:
 
-### Step 1
+1. Node **24**, Rust **stable** with **`wasm32-unknown-unknown`**, **wasm-pack**
+2. `npm ci` → `npm run ci` (`lint`, `test`, `build` for all projects)
+3. Production build with `--baseHref=/${{ github.event.repository.name }}/`
+4. Copy `index.html` → `404.html` for client-side routing on Pages
+5. Upload artifact and **deploy-pages**
 
-To connect to Nx Cloud, run the following command:
+**One-time repo setup:** Settings → Pages → Source: **GitHub Actions**. After the first successful run, set the live demo URL in this README.
 
-```sh
-npx nx connect
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph main [Main thread — Angular]
+    SettingsPage --> ProducerService
+    DashboardPage --> ProducerService
+    ProducerService --> ProducerWorkerService
+  end
+  subgraph worker [Web Worker]
+    WorkerEntry["producer.worker.ts"] --> ProducerEngine
+    ProducerEngine --> WasmGen["Wasm MarketProducer"]
+    ProducerEngine --> Acc["MetricsAccumulator"]
+  end
+  ProducerWorkerService -->|"Start / Pause / Resume / Dispose + runId"| WorkerEntry
+  WorkerEntry -->|"Snapshot / Status / InitError + runId"| ProducerWorkerService
 ```
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+**Data path:** Wasm `generate_batch(n)` returns a struct-of-arrays **`Int32Array`** (`n × 7` fields per trade: instrument index, price, qty, bid, ask, bid qty, ask qty). The worker feeds batches into `MetricsAccumulator`; snapshots are **`InstrumentMetrics[]`** posted to the UI.
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+**Lifecycle:** A single worker is created at app init (`ProducerWorkerService`). **Apply** frees the old Wasm producer, creates a new one, resets the accumulator, and bumps **`runId`**. **Dispose** on teardown terminates the worker.
 
-### Step 2
+## Design decisions
 
-Use the following command to configure a CI workflow for your workspace:
+### Metrics in the worker (TypeScript), not in Rust
 
-```sh
-npx nx g ci-workflow
+Wasm focuses on fast pseudo-random market simulation. Aggregation lives in **`market-engine`** so Jest can test formulas (spread, imbalance, notional) without loading Wasm. An alternative—compute everything in Rust and send only snapshots—would reduce JS work but weaken unit-test coverage and couple UI metrics to the crate.
+
+### `Int32Array` struct-of-arrays (SoA)
+
+Each batch is a flat typed array instead of JSON objects. That avoids serialization overhead and extra allocations when crossing the Wasm/JS boundary; the worker applies one linear scan per batch.
+
+Prices and book levels are **integer cents** in the wire format; the UI formats USD via pipes.
+
+### `runId`
+
+`ProducerService` increments **`runId`** on every **Apply**. Worker messages carry the same id; stale messages (e.g. after a quick re-apply or late snapshot from a previous run) are ignored. Snapshots for the **current** run that arrive **after Pause** are still accepted—they reflect trades generated before the timer stopped.
+
+### Snapshot throttling (~100 ms)
+
+`ProducerEngine` emits snapshots at most about once per **`DEFAULT_SNAPSHOT_INTERVAL_MS`** (100 ms), with leading and trailing edges. Every trade is still applied to the accumulator immediately, so throttling only affects UI refresh rate, not metric correctness.
+
+### No catch-up batches after Pause
+
+**Pause** clears the scheduler timer. **Resume** schedules the next batch from “now”, without generating bursts to fill the paused interval. Nominal rate comes from settings; **actual rate** reflects measured throughput (useful when batches run slower than the configured interval).
+
+### Scheduler behavior under load
+
+Scheduling uses a self-correcting **`setTimeout`**. If a batch overruns its interval, the next tick runs as soon as possible rather than stacking delayed catch-up work.
+
+## Repository structure
+
+```
+apps/market-dashboard/     Angular app (layout, dashboard, settings, producer.worker)
+libs/market-engine/        Pure TS: MetricsAccumulator, ProducerEngine, message types
+libs/market-producer-wasm/ Rust crate + wasm-pack → public/wasm assets
+libs/shared/utils/         Shared helpers (e.g. isNil)
+.github/workflows/         deploy.yml — CI + GitHub Pages
+AGENTS.md                  Local agent/orchestrator notes for this repo
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Feature code follows NgModule layout: lazy routes, `declarations/` barrels, **`ProducerService`** as the only UI entry to worker logic (components do not construct workers directly).
 
-## Install Nx Console
+## License
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+MIT (see `package.json`).
