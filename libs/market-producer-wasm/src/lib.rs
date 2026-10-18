@@ -4,8 +4,11 @@ const FIELDS_PER_UPDATE: usize = 7;
 const MAX_INSTRUMENTS: usize = 50;
 const MIN_SPREAD_CENTS: i32 = 1;
 const MIN_TRADE_QTY: i32 = 1;
+const MAX_TRADE_QTY: i32 = 250;
+const MIN_BOOK_QTY: i32 = 500;
+const BOOK_QTY_FLOOR: i32 = MIN_BOOK_QTY + MAX_TRADE_QTY;
 const MAX_BOOK_QTY: i32 = 1_000_000;
-const MAX_TRADE_QTY: i32 = 10_000;
+const BOOK_QTY_WALK: i32 = 400;
 const PRICE_WALK_MAX_DELTA: i32 = 5;
 const INITIAL_MID_CENTS: i32 = 10_000;
 
@@ -70,8 +73,8 @@ impl InstrumentState {
         Self {
             mid_cents: mid_cents.max(half_spread_cents + 1),
             half_spread_cents,
-            bid_qty: rng.next_i32_range(0, 50_000),
-            ask_qty: rng.next_i32_range(0, 50_000),
+            bid_qty: rng.next_i32_range(2_000, 20_000),
+            ask_qty: rng.next_i32_range(2_000, 20_000),
         }
     }
 
@@ -86,11 +89,10 @@ impl InstrumentState {
     fn apply_random_walk(&mut self, rng: &mut Rng) {
         let delta = rng.next_i32_range(-PRICE_WALK_MAX_DELTA, PRICE_WALK_MAX_DELTA);
         self.mid_cents = (self.mid_cents + delta).max(self.half_spread_cents + 1);
-        if rng.next_bool() {
-            self.bid_qty = (self.bid_qty + rng.next_i32_range(-100, 100)).clamp(0, MAX_BOOK_QTY);
-        } else {
-            self.ask_qty = (self.ask_qty + rng.next_i32_range(-100, 100)).clamp(0, MAX_BOOK_QTY);
-        }
+        self.bid_qty = (self.bid_qty + rng.next_i32_range(-BOOK_QTY_WALK, BOOK_QTY_WALK))
+            .clamp(BOOK_QTY_FLOOR, MAX_BOOK_QTY);
+        self.ask_qty = (self.ask_qty + rng.next_i32_range(-BOOK_QTY_WALK, BOOK_QTY_WALK))
+            .clamp(BOOK_QTY_FLOOR, MAX_BOOK_QTY);
     }
 
     fn generate_update(&mut self, rng: &mut Rng) -> [i32; FIELDS_PER_UPDATE] {
@@ -224,7 +226,10 @@ pub fn check_batch_invariants(batch: &[i32], instrument_count: u32) -> bool {
         if trade_qty <= 0 {
             return false;
         }
-        if bid_qty < 0 || ask_qty < 0 {
+        if bid_qty < MIN_BOOK_QTY || ask_qty < MIN_BOOK_QTY {
+            return false;
+        }
+        if (bid_qty - ask_qty).abs() >= bid_qty + ask_qty {
             return false;
         }
         if price_cents != bid_cents && price_cents != ask_cents {
@@ -288,6 +293,14 @@ mod tests {
             assert!((mid - prev_mid).abs() <= PRICE_WALK_MAX_DELTA);
             prev_mid = mid;
         }
+    }
+
+    #[test]
+    fn book_stays_two_sided_over_large_batch() {
+        let count = 8;
+        let mut producer = MarketProducerCore::new(count, 42);
+        let batch = producer.generate_batch(50_000);
+        assert!(check_batch_invariants(&batch, count));
     }
 
     #[test]

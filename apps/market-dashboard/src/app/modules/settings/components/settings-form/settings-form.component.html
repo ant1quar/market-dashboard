@@ -6,8 +6,8 @@
     <p-inputnumber
       inputId="instrumentCount"
       formControlName="instrumentCount"
-      [min]="limits.instrumentCount.min"
-      [max]="limits.instrumentCount.max"
+      locale="en-US"
+      [maxFractionDigits]="2"
       [useGrouping]="false"
       [showButtons]="true"
     />
@@ -26,8 +26,8 @@
     <p-inputnumber
       inputId="updatesPerBatch"
       formControlName="updatesPerBatch"
-      [min]="limits.updatesPerBatch.min"
-      [max]="limits.updatesPerBatch.max"
+      locale="en-US"
+      [maxFractionDigits]="2"
       [useGrouping]="false"
       [showButtons]="true"
     />
@@ -46,8 +46,8 @@
     <p-inputnumber
       inputId="batchIntervalMs"
       formControlName="batchIntervalMs"
-      [min]="limits.batchIntervalMs.min"
-      [max]="limits.batchIntervalMs.max"
+      locale="en-US"
+      [maxFractionDigits]="2"
       [useGrouping]="false"
       [showButtons]="true"
       suffix=" ms"
