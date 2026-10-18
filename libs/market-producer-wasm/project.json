@@ -1,0 +1,34 @@
+{
+  "name": "market-producer-wasm",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/market-producer-wasm/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{projectRoot}/pkg",
+        "{workspaceRoot}/apps/market-dashboard/public/wasm"
+      ],
+      "options": {
+        "commands": [
+          "wasm-pack build --release --target web --out-dir pkg",
+          "mkdir -p ../../apps/market-dashboard/public/wasm",
+          "cp pkg/market_producer_wasm_bg.wasm ../../apps/market-dashboard/public/wasm/market_producer_bg.wasm",
+          "cp pkg/market_producer_wasm.js ../../apps/market-dashboard/public/wasm/market_producer.js",
+          "cp pkg/market_producer_wasm.d.ts ../../apps/market-dashboard/public/wasm/market_producer.d.ts"
+        ],
+        "cwd": "libs/market-producer-wasm",
+        "parallel": false
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cargo test",
+        "cwd": "libs/market-producer-wasm"
+      }
+    }
+  }
+}

@@ -5,8 +5,10 @@
   "prefix": "app",
   "sourceRoot": "apps/market-dashboard/src",
   "tags": [],
+  "implicitDependencies": ["market-producer-wasm"],
   "targets": {
     "build": {
+      "dependsOn": ["market-producer-wasm:build"],
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "options": {

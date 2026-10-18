@@ -44,3 +44,7 @@ Thumbs.db
 .claude/settings.local.json
 
 .angular
+
+libs/market-producer-wasm/pkg
+libs/market-producer-wasm/target
+apps/market-dashboard/public/wasm
