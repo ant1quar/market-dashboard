@@ -31,7 +31,8 @@ export class SettingsFormComponent {
   protected readonly limits = inject(PRODUCER_LIMITS);
 
   protected readonly form: FormGroup<SettingsFormModel> = this.createForm(
-    this.limits
+    this.limits,
+    this.producer.settings()
   );
 
   public constructor() {
@@ -52,9 +53,12 @@ export class SettingsFormComponent {
     this.form.markAsPristine();
   }
 
-  private createForm(limits: ProducerLimits): FormGroup<SettingsFormModel> {
+  private createForm(
+    limits: ProducerLimits,
+    initial: ProducerSettings
+  ): FormGroup<SettingsFormModel> {
     return this.formBuilder.group({
-      instrumentCount: this.formBuilder.control(0, {
+      instrumentCount: this.formBuilder.control(initial.instrumentCount, {
         validators: [
           Validators.required,
           Validators.min(limits.instrumentCount.min),
@@ -62,7 +66,7 @@ export class SettingsFormComponent {
           integerValidator(),
         ],
       }),
-      updatesPerBatch: this.formBuilder.control(0, {
+      updatesPerBatch: this.formBuilder.control(initial.updatesPerBatch, {
         validators: [
           Validators.required,
           Validators.min(limits.updatesPerBatch.min),
@@ -70,7 +74,7 @@ export class SettingsFormComponent {
           integerValidator(),
         ],
       }),
-      batchIntervalMs: this.formBuilder.control(0, {
+      batchIntervalMs: this.formBuilder.control(initial.batchIntervalMs, {
         validators: [
           Validators.required,
           Validators.min(limits.batchIntervalMs.min),

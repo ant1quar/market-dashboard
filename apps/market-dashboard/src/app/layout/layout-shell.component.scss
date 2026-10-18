@@ -31,3 +31,7 @@
 .layout__main {
   @apply flex flex-1 flex-col px-6 py-6;
 }
+
+.layout__error {
+  @apply mb-4;
+}

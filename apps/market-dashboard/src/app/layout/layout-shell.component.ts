@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { ProducerService } from '../modules/producer/services/producer.service';
 
 @Component({
   selector: 'app-layout-shell',
@@ -6,4 +7,6 @@ import { Component } from '@angular/core';
   templateUrl: './layout-shell.component.html',
   styleUrl: './layout-shell.component.scss',
 })
-export class LayoutShellComponent {}
+export class LayoutShellComponent {
+  protected readonly producer = inject(ProducerService);
+}

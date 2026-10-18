@@ -30,6 +30,8 @@ export const producerProviders: Array<Provider | EnvironmentProviders> = [
   },
   provideAppInitializer(() => {
     inject(ProducerWorkerService);
-    inject(ProducerService).connect();
+    const producer = inject(ProducerService);
+    producer.connect();
+    producer.apply(inject(PRODUCER_DEFAULTS));
   }),
 ];

@@ -119,6 +119,7 @@ describe('ProducerEngine', () => {
 
     scheduler.advance(batchIntervalMs);
     expect(generator.batchSizes.length).toBe(1);
+    expect(generator.batchSizes[0]).toBe(updatesPerBatch);
 
     engine.pause();
     const batchesBeforePause = generator.batchSizes.length;

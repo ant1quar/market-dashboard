@@ -1,8 +1,5 @@
 <section class="page">
   <h1 class="page__heading">Dashboard</h1>
-  @if (producer.error(); as errorMessage) {
-    <p-message severity="error" [text]="errorMessage" />
-  }
   <app-producer-controls />
   <app-market-table />
 </section>

@@ -23,6 +23,11 @@
     </nav>
   </header>
   <main class="layout__main">
+    @if (producer.error(); as errorMessage) {
+      <div class="layout__error">
+        <p-message severity="error" [text]="errorMessage" />
+      </div>
+    }
     <router-outlet />
   </main>
 </div>

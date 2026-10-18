@@ -47,6 +47,22 @@ describe('SettingsFormComponent', () => {
     fixture.detectChanges();
   });
 
+  it('initializes with applied producer settings', () => {
+    expect(component['form'].getRawValue()).toEqual(appliedSettings);
+  });
+
+  it('does not call apply when the user edits the form', () => {
+    component['form'].controls.instrumentCount.setValue(10);
+    expect(producerApply).not.toHaveBeenCalled();
+  });
+
+  it('marks the form pristine after Apply', () => {
+    component['form'].controls.instrumentCount.setValue(10);
+    component['form'].markAsDirty();
+    component['applyHandler']();
+    expect(component['form'].pristine).toBe(true);
+  });
+
   it('marks boundary violations as invalid', () => {
     const form = component['form'];
     form.controls.instrumentCount.setValue(

@@ -2,17 +2,17 @@
 
 Test-task implementation: a zoneless **Angular 21** dashboard that simulates high-frequency market data, aggregates trading metrics off the main thread, and renders a live instrument table with configurable producer settings.
 
-|                |                                                        |
-| -------------- | ------------------------------------------------------ |
-| **Live demo**  | _TODO: `https://<github-user>.github.io/<repo-name>/`_ |
-| **Repository** | _TODO: `https://github.com/<github-user>/<repo-name>`_ |
+|                |                                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| **Live demo**  | `https://<github-user>.github.io/realtime-fintech-dashboard/` — [one-time setup](docs/GITHUB_PAGES.md) |
+| **Repository** | `https://github.com/<github-user>/realtime-fintech-dashboard` — [one-time setup](docs/GITHUB_PAGES.md) |
 
 ## Overview
 
 The app exposes two routes:
 
-- **Dashboard** — PrimeNG table with last price, bid/ask, spread, volume, notional, and order-book imbalance; pause/resume and nominal vs actual update rate.
-- **Settings** — reactive form (instrument count, batch size, interval) validated against limits; **Apply** starts or restarts generation with a new seed.
+- **Dashboard** — PrimeNG table with symbol, last price, bid–ask spread, volume, VWAP, and order-book imbalance; pause/resume and nominal vs actual update rate.
+- **Settings** — reactive form (instrument count, batch size, interval) validated against limits; **Apply** restarts generation with a new seed (the app also starts automatically with default settings on load).
 
 Market ticks are produced in **Rust/WebAssembly** inside a dedicated **Web Worker**. Rolling metrics are computed in the pure TypeScript **`@test/market-engine`** library (`MetricsAccumulator`, `ProducerEngine`). The main thread only receives throttled snapshots via **`ProducerService`** (Angular signals).
 
@@ -37,8 +37,8 @@ After `rustup-init`, ensure **`~/.cargo/bin`** is on your `PATH` so `cargo`, `ru
 ## Install
 
 ```bash
-git clone <your-repo-url>
-cd <repo-name>
+git clone https://github.com/<github-user>/realtime-fintech-dashboard.git
+cd realtime-fintech-dashboard
 npm ci
 ```
 
@@ -54,7 +54,7 @@ npx nx serve market-dashboard
 npx nx serve market-dashboard --configuration=development
 ```
 
-Open the URL printed by the dev server (typically `http://localhost:4200`). Use **Settings → Apply** to start the producer.
+Open the URL printed by the dev server (typically `http://localhost:4200`). The producer starts with default settings on app load; use **Settings → Apply** to change parameters and start a new run.
 
 Serve the production bundle locally:
 
@@ -108,9 +108,11 @@ On every push to **`main`**:
 4. Copy `index.html` → `404.html` for client-side routing on Pages
 5. Upload artifact and **deploy-pages**
 
-**One-time repo setup:** Settings → Pages → Source: **GitHub Actions**. After the first successful run, set the live demo URL in this README.
+**One-time repo setup:** see **[docs/GITHUB_PAGES.md](docs/GITHUB_PAGES.md)** (`./scripts/publish-github.sh`, then Settings → Pages → **GitHub Actions**). After the first successful deploy, replace `<github-user>` in the links at the top of this README.
 
 ## Architecture
+
+Подробное описание слоёв, протокола worker и жизненного цикла: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** (RU).
 
 ```mermaid
 flowchart LR

@@ -52,6 +52,89 @@ describe('ProducerService', () => {
     });
   }
 
+  it('ignores status from a stale runId', () => {
+    service.apply(defaultSettings);
+    fakeWorker.emit({
+      type: WorkerMessageType.Status,
+      runId: 1,
+      status: 'running',
+      nominalRatePerSecond: 20,
+      actualRatePerSecond: 20,
+    });
+    expect(service.status()).toBe(ProducerStatus.Running);
+
+    service.apply({
+      instrumentCount: 2,
+      updatesPerBatch: 5,
+      batchIntervalMs: 100,
+    });
+
+    fakeWorker.emit({
+      type: WorkerMessageType.Status,
+      runId: 1,
+      status: 'paused',
+      nominalRatePerSecond: 0,
+      actualRatePerSecond: 0,
+    });
+
+    expect(service.status()).toBe(ProducerStatus.Running);
+  });
+
+  it('apply after pause starts a new run and clears accumulated rows', () => {
+    jest
+      .spyOn(globalThis.crypto, 'getRandomValues')
+      .mockImplementation((array: ArrayBufferView) => {
+        const view = array as Uint32Array;
+        view[0] = 3;
+        view[1] = 4;
+        return view;
+      });
+
+    service.apply(defaultSettings);
+    fakeWorker.emit({
+      type: WorkerMessageType.Status,
+      runId: 1,
+      status: 'paused',
+      nominalRatePerSecond: 100,
+      actualRatePerSecond: 100,
+    });
+
+    snapshotRows(1, [
+      {
+        instrumentIdx: 0,
+        symbol: 'ALFA',
+        lastPriceCents: 10_000,
+        spreadCents: 2,
+        volume: 50,
+        vwapCents: 10_000,
+        imbalance: 0.1,
+      },
+    ]);
+
+    const nextSettings: ProducerSettings = {
+      instrumentCount: 1,
+      updatesPerBatch: 5,
+      batchIntervalMs: 200,
+    };
+
+    service.apply(nextSettings);
+
+    expect(service.rows().length).toBe(1);
+    expect(service.rows()[0].volume).toBe(0);
+    expect(service.settings()).toEqual(nextSettings);
+
+    const start = fakeWorker.posted.find(
+      msg => msg.type === WorkerMessageType.Start && msg.runId === 2
+    );
+    expect(start).toMatchObject({
+      type: WorkerMessageType.Start,
+      runId: 2,
+      instrumentCount: 1,
+      updatesPerBatch: 5,
+      batchIntervalMs: 200,
+    });
+  });
+
   it('apply resets rows and sends Start with an incremented runId', () => {
     snapshotRows(0, [
       {
@@ -155,5 +238,67 @@ describe('ProducerService', () => {
   it('terminates the worker on destroy', () => {
     service.ngOnDestroy();
     expect(fakeWorker.terminate).toHaveBeenCalled();
+  });
+});
+
+describe('ProducerService apply before worker ready', () => {
+  let fakeWorker: FakeProducerWorker;
+  let service: ProducerService;
+
+  const defaultSettings: ProducerSettings = {
+    instrumentCount: 3,
+    updatesPerBatch: 10,
+    batchIntervalMs: 100,
+  };
+
+  beforeEach(() => {
+    fakeWorker = new FakeProducerWorker();
+
+    TestBed.configureTestingModule({
+      providers: [
+        ProducerWorkerService,
+        ProducerService,
+        { provide: PRODUCER_DEFAULTS, useValue: defaultSettings },
+        {
+          provide: PRODUCER_WORKER_FACTORY,
+          useValue: () => fakeWorker as unknown as Worker,
+        },
+      ],
+    });
+
+    service = TestBed.inject(ProducerService);
+    service.connect();
+  });
+
+  afterEach(() => {
+    service.ngOnDestroy();
+  });
+
+  it('queues Start with runId 1 when apply runs before the worker is ready', () => {
+    jest
+      .spyOn(globalThis.crypto, 'getRandomValues')
+      .mockImplementation((array: ArrayBufferView) => {
+        const view = array as Uint32Array;
+        view[0] = 9;
+        view[1] = 8;
+        return view;
+      });
+
+    service.apply(defaultSettings);
+
+    expect(fakeWorker.posted).toEqual([]);
+
+    fakeWorker.emitReady();
+
+    expect(fakeWorker.posted).toEqual([
+      {
+        type: WorkerMessageType.Start,
+        runId: 1,
+        instrumentCount: 3,
+        updatesPerBatch: 10,
+        batchIntervalMs: 100,
+        seed: 9 * 0x1_0000_0000 + 8,
+      },
+    ]);
   });
 });
