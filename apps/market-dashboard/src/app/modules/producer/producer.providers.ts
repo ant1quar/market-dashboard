@@ -12,10 +12,8 @@ import {
   PRODUCER_SETTINGS_LIMITS,
 } from './declarations';
 import { ProducerService } from './services/producer.service';
-import {
-  createDefaultProducerWorker,
-  ProducerWorkerService,
-} from './services/workers/producer-worker.service';
+import { createDefaultProducerWorker } from './services/workers/producer-worker.factory';
+import { ProducerWorkerService } from './services/workers/producer-worker.service';
 
 export const producerProviders: Array<Provider | EnvironmentProviders> = [
   {

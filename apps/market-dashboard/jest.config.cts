@@ -13,6 +13,10 @@ module.exports = {
     ],
   },
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+  moduleNameMapper: {
+    'producer-worker\\.factory$':
+      '<rootDir>/src/app/modules/producer/testing/producer-worker.factory.jest.ts',
+  },
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',

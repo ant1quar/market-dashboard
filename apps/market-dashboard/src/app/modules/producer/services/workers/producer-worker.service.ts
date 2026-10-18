@@ -9,13 +9,6 @@ import { isNil } from '@test/shared-utils';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { PRODUCER_WORKER_FACTORY, ProducerStatus } from '../../declarations';
 
-export function createDefaultProducerWorker(): Worker {
-  return new Worker(
-    new URL('../../../../workers/producer.worker', import.meta.url),
-    { type: 'module' }
-  );
-}
-
 @Injectable({ providedIn: 'root' })
 export class ProducerWorkerService implements OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
