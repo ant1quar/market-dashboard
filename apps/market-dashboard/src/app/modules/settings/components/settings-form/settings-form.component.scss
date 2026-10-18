@@ -1,0 +1,15 @@
+.settings-form {
+  @apply flex max-w-md flex-col gap-4;
+}
+
+.settings-form__field {
+  @apply flex flex-col gap-1;
+}
+
+.settings-form__label {
+  @apply text-sm font-medium text-slate-800;
+}
+
+.settings-form__error {
+  @apply text-xs text-red-600;
+}

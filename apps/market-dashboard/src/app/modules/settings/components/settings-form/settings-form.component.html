@@ -1,0 +1,64 @@
+<form class="settings-form" [formGroup]="form" (ngSubmit)="applyHandler()">
+  <div class="settings-form__field">
+    <label class="settings-form__label" for="instrumentCount">
+      Instruments
+    </label>
+    <p-inputnumber
+      inputId="instrumentCount"
+      formControlName="instrumentCount"
+      [min]="limits.instrumentCount.min"
+      [max]="limits.instrumentCount.max"
+      [useGrouping]="false"
+      [showButtons]="true"
+    />
+    @if (
+      form.controls.instrumentCount.invalid &&
+      form.controls.instrumentCount.touched
+    ) {
+      <p class="settings-form__error">Enter an integer from 1 to 50.</p>
+    }
+  </div>
+
+  <div class="settings-form__field">
+    <label class="settings-form__label" for="updatesPerBatch">
+      Updates per batch
+    </label>
+    <p-inputnumber
+      inputId="updatesPerBatch"
+      formControlName="updatesPerBatch"
+      [min]="limits.updatesPerBatch.min"
+      [max]="limits.updatesPerBatch.max"
+      [useGrouping]="false"
+      [showButtons]="true"
+    />
+    @if (
+      form.controls.updatesPerBatch.invalid &&
+      form.controls.updatesPerBatch.touched
+    ) {
+      <p class="settings-form__error">Enter an integer from 1 to 1000.</p>
+    }
+  </div>
+
+  <div class="settings-form__field">
+    <label class="settings-form__label" for="batchIntervalMs">
+      Batch interval (ms)
+    </label>
+    <p-inputnumber
+      inputId="batchIntervalMs"
+      formControlName="batchIntervalMs"
+      [min]="limits.batchIntervalMs.min"
+      [max]="limits.batchIntervalMs.max"
+      [useGrouping]="false"
+      [showButtons]="true"
+      suffix=" ms"
+    />
+    @if (
+      form.controls.batchIntervalMs.invalid &&
+      form.controls.batchIntervalMs.touched
+    ) {
+      <p class="settings-form__error">Enter an integer from 50 to 2000.</p>
+    }
+  </div>
+
+  <p-button type="submit" label="Apply" [disabled]="form.invalid" />
+</form>

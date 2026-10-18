@@ -1,4 +1,9 @@
-import { inject, Provider, provideAppInitializer } from '@angular/core';
+import {
+  EnvironmentProviders,
+  Provider,
+  inject,
+  provideAppInitializer,
+} from '@angular/core';
 import {
   PRODUCER_DEFAULTS,
   PRODUCER_LIMITS,
@@ -12,7 +17,7 @@ import {
   ProducerWorkerService,
 } from './services/workers/producer-worker.service';
 
-export const producerProviders: Provider[] = [
+export const producerProviders: Array<Provider | EnvironmentProviders> = [
   {
     provide: PRODUCER_DEFAULTS,
     useValue: PRODUCER_DEFAULT_SETTINGS,
