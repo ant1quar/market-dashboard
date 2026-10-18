@@ -7,7 +7,7 @@ import {
 } from '@test/market-engine';
 import { isNil } from '@test/shared-utils';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { ProducerStatus } from '../../declarations';
+import { PRODUCER_WORKER_FACTORY, ProducerStatus } from '../../declarations';
 
 export function createDefaultProducerWorker(): Worker {
   return new Worker(
